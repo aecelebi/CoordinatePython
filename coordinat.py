@@ -8,10 +8,21 @@ class SituationsForPointAndLine(enum.Enum):  # Noktanın doğruya göre durumlar
     Contains = 2,
 
 
+class CartesianRegions(enum.Enum):
+    I = 1,
+    II = 2,
+    III = 3,
+    IV = 4,
+    Origin = 0,
+    X_Axis = -1,
+    Y_Axis = -2
+
+
 class Point:  # Nokta sınıfını tanımlıyoruz
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        self.region = CartesianCoordinate.find_region(self)
 
     def __str__(self):
         return "({}, {})".format(self.x, self.y)
@@ -28,12 +39,28 @@ class Point:  # Nokta sınıfını tanımlıyoruz
         self.y -= other.y
 
 
-class CartesianCoordinate: # Koordinat sistemi
+class Line:
+    def __init__(self, point1: Point, point2: Point):
+        self.p1 = point1
+        self.p2 = point2
+        self.slope = CartesianCoordinate.calculate_slope_two(self.p1, self.p2)
+
+    def __str__(self):
+        pass
+
+
+class Triangle:
+    def __init__(self, p1: Point, p2: Point, p3: Point):
+        self.points = (p1, p2, p3)
+        self.area = CartesianCoordinate.calculate_triangle_area(p1, p2, p3)
+
+
+class CartesianCoordinate:  # Koordinat sistemi
     @staticmethod
     def calculate_angle(point1: Point, point2: Point, point3: Point):
-        A = CartesianCoordinate.calculate_distance_between_two(point2, point3)
-        B = CartesianCoordinate.calculate_distance_between_two(point1, point3)
-        C = CartesianCoordinate.calculate_distance_between_two(point1, point2)
+        A = CartesianCoordinate.calculate_distance(point2, point3)
+        B = CartesianCoordinate.calculate_distance(point1, point3)
+        C = CartesianCoordinate.calculate_distance(point1, point2)
 
         cosC = (pow(A, 2) + pow(B, 2) - pow(C, 2)) / (2 * A * B)
         acosC = acos(cosC)
@@ -45,7 +72,7 @@ class CartesianCoordinate: # Koordinat sistemi
 
     @staticmethod
     def calculate_area(*args: Point):
-        if (len(args) < 3):
+        if len(args) < 3:
             return 0
         frame_points: [Point] = []
         lowest_point: Point
@@ -70,7 +97,7 @@ class CartesianCoordinate: # Koordinat sistemi
                 not_found = True
                 for ix in args:
                     if not (CartesianCoordinate.check_is_point_in(i,
-                                                                 frame_points) or (i.x == ix.x and i.y == i.y)):
+                                                                  frame_points) or (i.x == ix.x and i.y == i.y)):
                         result = CartesianCoordinate.check_point_situation_to_line(frame_points[-1], i, ix)
                         slope = CartesianCoordinate.calculate_slope_two(frame_points[-1], i)
 
@@ -154,9 +181,9 @@ class CartesianCoordinate: # Koordinat sistemi
 
     @staticmethod
     def calculate_triangle_area(point1: Point, point2: Point, point3: Point) -> float:
-        A = CartesianCoordinate.calculate_distance_between_two(point2, point3)
-        B = CartesianCoordinate.calculate_distance_between_two(point1, point3)
-        C = CartesianCoordinate.calculate_distance_between_two(point1, point2)
+        A = CartesianCoordinate.calculate_distance(point2, point3)
+        B = CartesianCoordinate.calculate_distance(point1, point3)
+        C = CartesianCoordinate.calculate_distance(point1, point2)
 
         cosC = (pow(A, 2) + pow(B, 2) - pow(C, 2)) / (2 * A * B)
         acosC = acos(cosC)
@@ -172,6 +199,7 @@ class CartesianCoordinate: # Koordinat sistemi
 
         return ABC
 
+
     @staticmethod
     def check_is_point_in(point_check: Point, points: [Point]):
         for i in points:
@@ -182,7 +210,7 @@ class CartesianCoordinate: # Koordinat sistemi
     @staticmethod
     def check_is_on_same_line(point1: Point, point2: Point, point3: Point):
         if CartesianCoordinate.calculate_slope_two(point1, point2) == CartesianCoordinate.calculate_slope_two(point1,
-                                                                                                            point3):
+                                                                                                              point3):
             return True
         else:
             return False
@@ -224,9 +252,30 @@ class CartesianCoordinate: # Koordinat sistemi
             return None
 
     @staticmethod
-    def calculate_distance_between_two(point1: Point, point2: Point):
+    def calculate_distance(point1: Point, point2: Point):
         distance = sqrt(pow(abs(point1.x - point2.x), 2) + pow(abs(point1.y - point2.y), 2))
         return distance
+
+    @staticmethod
+    def center_point_between_two(point1: Point, point2: Point) -> Point:
+        return Point((point1.x + point2.x) / 2, (point1.y + point2.y) / 2)
+
+    @staticmethod
+    def find_region(point: Point) -> CartesianRegions:
+        if point.x > 0 and point.y > 0:
+            return CartesianRegions.I
+        elif point.x < 0 and point.y > 0:
+            return CartesianRegions.II
+        elif point.x < 0 and point.y < 0:
+            return CartesianRegions.III
+        elif point.x > 0 and point.y < 0:
+            return CartesianRegions.IV
+        elif point.x == 0 and not point.y == 0:
+            return CartesianRegions.X_Axis
+        elif point.y == 0 and not point.x == 0:
+            return CartesianRegions.Y_Axis
+        elif point.y == 0 and point.x == 0:
+            return CartesianRegions.Origin
 
 
 p1 = Point(0, 0)
