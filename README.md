@@ -1,6 +1,8 @@
 # CoordinatePython
 
-Line Class is the class that represents line between two points.(not available for now)
+Line Class is the class that represents line between two points.(limited functions)
+
+Triangle class is the class that represents triangle.(limited functions)
 
 Point Class is the class that represents Point.
 
@@ -22,3 +24,7 @@ Returns area value. Uses Law of Cosines and Law of Sines.
 - calculate_slope_two(point1: Point, point2: Point) -> Calculates slope of line that is between point1 and point2. Returns slope value.
 
 - calculate_distance(point1: Point, point2: Point) -> Calculates distance between given points. Returns distance value. Uses Pythagorean Theorem.
+
+- center_point_between_two(point1: Point, point2: Point) -> Calculates center point of line between point1 and point2. Returns Point
+
+- find_region(point: Point) ->  Returns region of point.
