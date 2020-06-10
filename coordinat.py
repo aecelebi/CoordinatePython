@@ -86,9 +86,10 @@ class CartesianCoordinate:  # Koordinat sistemi
             if i.y < lowest_point.y:
                 lowest_point = i
             if i.y > highest_point.y:
-                highest_point = i
+                highest_point = i  # Y değeri en yüksek ve en düşük noktayı seçiyoruz
 
         frame_points.append(lowest_point)
+        # Y değeri en düşük noktayı kapsayacak bir nokta bulunmadığında çokgenin çevresinin bir parçasıdır
 
         while True:
             finish_loop = True
@@ -100,7 +101,8 @@ class CartesianCoordinate:  # Koordinat sistemi
                                                                   frame_points) or (i.x == ix.x and i.y == i.y)):
                         result = CartesianCoordinate.check_point_situation_to_line(frame_points[-1], i, ix)
                         slope = CartesianCoordinate.calculate_slope_two(frame_points[-1], i)
-
+                        # Çerçeveye eklenen son nokta ile noktalardan birini seçiyoruz(i)
+                        # Sırayla(ix) diğer noktaların aralarında çektiğimiz doğruyla ilişkisini buluyoruz
                         print()
                         print(result)
                         print(slope)
@@ -112,11 +114,15 @@ class CartesianCoordinate:  # Koordinat sistemi
                                     result == SituationsForPointAndLine.Below and not low_to_high)):
                                 not_found = False
                                 break
+                            # Eğer doğrumuz dikse ve nokta seçimlerimiz aşağıdan yukarıya ve doğru üstte kaldıysa ya da
+                            # seçimlerimiz alta doğru ve doğru altta kaldıysa sorun yok demektir.
+                            # Bunun aksi bir durum söz konusuysa i noktasını çerçeveye eklemiyoruz
                         elif slope == 0:
                             if (not low_to_high and SituationsForPointAndLine.Below) or (
                                     low_to_high and SituationsForPointAndLine.Above) and (i.y != highest_point.y):
                                 not_found = False
                                 break
+                            # Benzer durum eğim 0 olduğunda geçerli
                         elif (result == SituationsForPointAndLine.Above and
                               ((not low_to_high and slope < 0) or
                                (low_to_high and slope > 0))) or \
@@ -125,15 +131,21 @@ class CartesianCoordinate:  # Koordinat sistemi
                                   (low_to_high and slope < 0))):
                             not_found = False
                             break
+                            # Eğim varsa negatif ya da pozitif olma durumuna göre noktanın bulunduğu pozisyonun
+                            # çokgenin çerçevesi için sorun oluşturup oluşturmadığına bakıyoruz
 
                 if not_found and not CartesianCoordinate.check_is_point_in(i, frame_points):
                     finish_loop = False
                     frame_points.append(i)
+                # Eğer i ve son çerçeve noktası arasında oluşturulan çizgiye göre tüm noktalar doğru yerdeyse i
+                # bir sonraki çerçeve noktası demektir ve i'yi çerçeveye ekliyoruz.
 
                     if frame_points[-1].x == highest_point.x and frame_points[-1].y == highest_point.y:
                         low_to_high = False
+                    # en yüksek noktaya geldiğimizde yönümüzü değiştiriyoruz
             if finish_loop:
                 break
+                # bunu hiçbir nokta kalmayana kadar yapıyoruz
 
         print(frame_points)
 
@@ -144,6 +156,7 @@ class CartesianCoordinate:  # Koordinat sistemi
             else:
                 if CartesianCoordinate.check_is_on_same_line(frame_points[0], frame_points[i], frame_points[i + 1]):
                     frame_points.pop(i + 1)
+            # arka arkaya aynı doğruda olan 3 nokta olup olmadığını kontrol ediyoruz
 
         while True:
             changed = False
@@ -159,6 +172,7 @@ class CartesianCoordinate:  # Koordinat sistemi
 
             if not changed:
                 break
+            # noktaları y değerine göre küçükten büyüğe sıralıyoruz
 
         triangles: [(Point, Point, Point)] = []
 
@@ -168,7 +182,9 @@ class CartesianCoordinate:  # Koordinat sistemi
                 triangles.append((frame_points[i - 1], frame_points[i + 1], frame_points[i + 2]))
             else:
                 triangles.append((frame_points[i], frame_points[i + 1], frame_points[i + 2]))
-
+            # çokgenimizi üçgenlere bölüyoruz. Ancak bu işlemi yaparken çakışma olmaması için üçer üçer seçtiğimiz
+            # noktalardan şimdiki üçlünün ilk elemanının bir önceki üçlünün son elemanı ile sıradaki grubun 2.
+            # elemanı arasında çizdiğimiz doğrunun altında kalıp kalmadığını kontrol ediyoruz
         print(frame_points)
         print(triangles)
 
@@ -176,7 +192,7 @@ class CartesianCoordinate:  # Koordinat sistemi
 
         for i in triangles:
             area += CartesianCoordinate.calculate_triangle_area(i[0], i[1], i[2])
-
+            #en sonda bu üçgenlerin alanını hesaplıyoruz ve topluyoruz
         return area
 
     @staticmethod
@@ -185,11 +201,11 @@ class CartesianCoordinate:  # Koordinat sistemi
         B = CartesianCoordinate.calculate_distance(point1, point3)
         C = CartesianCoordinate.calculate_distance(point1, point2)
 
-        cosC = (pow(A, 2) + pow(B, 2) - pow(C, 2)) / (2 * A * B)
+        cosC = (pow(A, 2) + pow(B, 2) - pow(C, 2)) / (2 * A * B) # Kosinüs teoreminden yararlanarak cos(BCA)'yı buluyoruz
         acosC = acos(cosC)
         sinC = sin(acosC)
 
-        ABC = round(1 / 2 * A * B * sinC, 5)
+        ABC = round(1 / 2 * A * B * sinC, 5) # Bu değeri sinüse çevirip Sinüs teoreminden yararlanıp alanı hesaplıyoruz
         print("\nA kenarı: " + str(A) + "\nB kenarı: " + str(B) + "\nC kenarı: " + str(C))
 
         print("cosC: " + str(cosC))
@@ -286,4 +302,4 @@ p5 = Point(4, 1)
 p6 = Point(2, 3)
 p7 = Point(3, 7)
 
-print(CartesianCoordinate.calculate_area(p1, p2, p3, p4, Point(-3, -2), Point(-4, 8), Point(0, 10), Point(-6, 4)))
+print(CartesianCoordinate.calculate_area(p1, p4, p3, p2, Point(-3, -2), Point(-4, 8), Point(0, 10), Point(-6, 4)))
